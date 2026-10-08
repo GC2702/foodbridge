@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-function CountdownBadge({ targetDate }) {
+function CountdownBadge({ targetDate, onExpire }) {
   const [timeLeft, setTimeLeft] = useState('');
   const [isExpired, setIsExpired] = useState(false);
 
@@ -11,7 +11,10 @@ function CountdownBadge({ targetDate }) {
       const diff = new Date(targetDate).getTime() - Date.now();
       if (diff <= 0) {
         setTimeLeft('EXPIRED');
-        setIsExpired(true);
+        if (!isExpired) {
+          setIsExpired(true);
+          if (onExpire) onExpire();
+        }
       } else {
         const mins = Math.floor((diff / (1000 * 60)) % 60);
         const secs = Math.floor((diff / 1000) % 60);
@@ -22,7 +25,7 @@ function CountdownBadge({ targetDate }) {
     calc();
     const timer = setInterval(calc, 1000);
     return () => clearInterval(timer);
-  }, [targetDate]);
+  }, [targetDate, isExpired, onExpire]);
 
   return (
     <span
@@ -118,8 +121,6 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a', fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', padding: '32px 16px' }}>
       <div style={{ maxWidth: '850px', margin: '0 auto' }}>
-        
-        {/* Header */}
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -133,7 +134,6 @@ export default function App() {
           </span>
         </header>
 
-        {/* Impact Metric Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '28px' }}>
           <div style={{ background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{ width: '48px', height: '48px', borderRadius: '10px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
@@ -156,7 +156,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Notification Toasts */}
         {errorMsg && (
           <div style={{ padding: '12px 16px', background: '#fef2f2', color: '#991b1b', border: '1px solid #fecaca', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>⚠️</span> {errorMsg}
@@ -168,7 +167,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Post Creation Card */}
         <div style={{ background: '#ffffff', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', marginBottom: '32px' }}>
           <h2 style={{ fontSize: '1.15rem', fontWeight: '700', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>📢</span> List Surplus Food
@@ -241,7 +239,6 @@ export default function App() {
           </form>
         </div>
 
-        {/* Listings Section */}
         <div>
           <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '16px' }}>Active Food Rescues</h2>
           {posts.length === 0 ? (
@@ -251,7 +248,8 @@ export default function App() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {posts.map(post => {
-                const isClosed = post.status === 'CLOSED';
+                const isExpiredNow = new Date(post.bestBefore).getTime() <= Date.now();
+                const isClosed = post.status === 'CLOSED' || isExpiredNow;
                 const percentLeft = Math.round((post.remainingServings / post.totalServings) * 100);
 
                 return (
@@ -269,7 +267,7 @@ export default function App() {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
                       <h3 style={{ fontSize: '1.15rem', fontWeight: '700', margin: 0 }}>{post.title}</h3>
-                      <CountdownBadge targetDate={post.bestBefore} />
+                      <CountdownBadge targetDate={post.bestBefore} onExpire={fetchData} />
                     </div>
 
                     <div style={{ display: 'flex', gap: '16px', fontSize: '0.88rem', color: '#475569', marginBottom: '14px', flexWrap: 'wrap' }}>
@@ -277,7 +275,6 @@ export default function App() {
                       <span>📦 <strong>Remaining:</strong> {post.remainingServings} of {post.totalServings} portions</span>
                     </div>
 
-                    {/* Visual Progress Bar for Servings */}
                     <div style={{ width: '100%', height: '6px', backgroundColor: '#e2e8f0', borderRadius: '3px', overflow: 'hidden', marginBottom: '16px' }}>
                       <div
                         style={{
@@ -340,7 +337,6 @@ export default function App() {
             </div>
           )}
         </div>
-
       </div>
     </div>
   );

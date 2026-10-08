@@ -87,7 +87,7 @@ app.get('/api/stats', (req, res) => {
   syncStatuses();
   const servingsSaved = claims.reduce((acc, c) => acc + c.quantity, 0);
   const servingsMissed = posts
-    .filter(p => p.status === 'CLOSED')
+    .filter(p => p.status === 'CLOSED' || new Date(p.bestBefore).getTime() <= Date.now())
     .reduce((acc, p) => acc + p.remainingServings, 0);
 
   res.json({ servingsSaved, servingsMissed });
