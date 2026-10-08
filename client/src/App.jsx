@@ -37,7 +37,6 @@ function CountdownBadge({ targetDate, onExpire }) {
         borderRadius: '20px',
         fontSize: '0.85rem',
         fontWeight: '600',
-        letterSpacing: '0.3px',
         backgroundColor: isExpired ? '#fef2f2' : '#ecfdf5',
         color: isExpired ? '#dc2626' : '#059669',
         border: `1px solid ${isExpired ? '#fecaca' : '#a7f3d0'}`,
@@ -72,7 +71,7 @@ export default function App() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 3000);
+    const interval = setInterval(fetchData, 2000);
     return () => clearInterval(interval);
   }, []);
 
@@ -82,10 +81,14 @@ export default function App() {
     setSuccessMsg('');
     setSubmitting(true);
     try {
+      const payload = {
+        ...form,
+        bestBefore: new Date(form.bestBefore).toISOString()
+      };
       const res = await fetch(`${API_BASE}/api/posts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error((await res.json()).error);
       setForm({ title: '', totalServings: '', pickupPoint: '', bestBefore: '' });
@@ -119,7 +122,7 @@ export default function App() {
   };
 
   const handleReset = async () => {
-    if (!window.confirm('Are you sure you want to delete all listings and reset metrics?')) return;
+    if (!window.confirm('Clear all entries and reset stats?')) return;
     try {
       await fetch(`${API_BASE}/api/reset`, { method: 'POST' });
       setSuccessMsg('All entries deleted and metrics reset.');
@@ -130,13 +133,13 @@ export default function App() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a', fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', padding: '32px 16px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif', padding: '32px 16px' }}>
       <div style={{ maxWidth: '850px', margin: '0 auto' }}>
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '2rem' }}>🍲</span>
-              <h1 style={{ fontSize: '1.85rem', fontWeight: '800', margin: 0, letterSpacing: '-0.5px' }}>FoodBridge</h1>
+              <h1 style={{ fontSize: '1.85rem', fontWeight: '800', margin: 0 }}>FoodBridge</h1>
             </div>
             <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.95rem' }}>Campus surplus food redistribution network</p>
           </div>
@@ -163,7 +166,7 @@ export default function App() {
         </header>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '28px' }}>
-          <div style={{ background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{ width: '48px', height: '48px', borderRadius: '10px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
               ✓
             </div>
@@ -173,7 +176,7 @@ export default function App() {
             </div>
           </div>
 
-          <div style={{ background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{ width: '48px', height: '48px', borderRadius: '10px', backgroundColor: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
               ✕
             </div>
@@ -185,30 +188,28 @@ export default function App() {
         </div>
 
         {errorMsg && (
-          <div style={{ padding: '12px 16px', background: '#fef2f2', color: '#991b1b', border: '1px solid #fecaca', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>⚠️</span> {errorMsg}
+          <div style={{ padding: '12px 16px', background: '#fef2f2', color: '#991b1b', border: '1px solid #fecaca', borderRadius: '8px', marginBottom: '20px' }}>
+            ⚠️ {errorMsg}
           </div>
         )}
         {successMsg && (
-          <div style={{ padding: '12px 16px', background: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>✅</span> {successMsg}
+          <div style={{ padding: '12px 16px', background: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0', borderRadius: '8px', marginBottom: '20px' }}>
+            ✅ {successMsg}
           </div>
         )}
 
-        <div style={{ background: '#ffffff', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', marginBottom: '32px' }}>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: '700', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>📢</span> List Surplus Food
-          </h2>
+        <div style={{ background: '#ffffff', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0', marginBottom: '32px' }}>
+          <h2 style={{ fontSize: '1.15rem', fontWeight: '700', margin: '0 0 16px 0' }}>📢 List Surplus Food</h2>
           <form onSubmit={handleCreatePost} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>Item Description</label>
               <input
                 type="text"
-                placeholder="e.g. 25 Sandwiches"
+                placeholder="e.g. Samosas"
                 value={form.title}
                 onChange={e => setForm({ ...form, title: e.target.value })}
                 required
-                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
               />
             </div>
             <div>
@@ -216,22 +217,22 @@ export default function App() {
               <input
                 type="number"
                 min="1"
-                placeholder="e.g. 25"
+                placeholder="e.g. 20"
                 value={form.totalServings}
                 onChange={e => setForm({ ...form, totalServings: e.target.value })}
                 required
-                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
               />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>Pickup Location</label>
               <input
                 type="text"
-                placeholder="e.g. AB3 Food Court"
+                placeholder="e.g. AB3 Ground Floor"
                 value={form.pickupPoint}
                 onChange={e => setForm({ ...form, pickupPoint: e.target.value })}
                 required
-                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
               />
             </div>
             <div>
@@ -241,7 +242,7 @@ export default function App() {
                 value={form.bestBefore}
                 onChange={e => setForm({ ...form, bestBefore: e.target.value })}
                 required
-                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
               />
             </div>
             <button
@@ -255,11 +256,7 @@ export default function App() {
                 border: 'none',
                 borderRadius: '6px',
                 fontWeight: '600',
-                cursor: 'pointer',
-                fontSize: '0.95rem',
-                marginTop: '6px',
-                boxShadow: '0 2px 4px rgba(37,99,235,0.2)',
-                transition: 'background 0.2s',
+                cursor: 'pointer'
               }}
             >
               {submitting ? 'Publishing...' : 'Publish Food Listing'}
@@ -277,7 +274,7 @@ export default function App() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {posts.map(post => {
                 const isExpiredNow = new Date(post.bestBefore).getTime() <= Date.now();
-                const isClosed = post.status === 'CLOSED' || isExpiredNow;
+                const isClosed = post.status === 'CLOSED' || isExpiredNow || post.remainingServings <= 0;
                 const percentLeft = Math.round((post.remainingServings / post.totalServings) * 100);
 
                 return (
@@ -288,17 +285,15 @@ export default function App() {
                       borderRadius: '12px',
                       border: '1px solid #e2e8f0',
                       padding: '20px',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                      opacity: isClosed ? 0.65 : 1,
-                      position: 'relative',
+                      opacity: isClosed ? 0.7 : 1,
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                       <h3 style={{ fontSize: '1.15rem', fontWeight: '700', margin: 0 }}>{post.title}</h3>
                       <CountdownBadge targetDate={post.bestBefore} onExpire={fetchData} />
                     </div>
 
-                    <div style={{ display: 'flex', gap: '16px', fontSize: '0.88rem', color: '#475569', marginBottom: '14px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '16px', fontSize: '0.88rem', color: '#475569', marginBottom: '14px' }}>
                       <span>📍 <strong>Pickup:</strong> {post.pickupPoint}</span>
                       <span>📦 <strong>Remaining:</strong> {post.remainingServings} of {post.totalServings} portions</span>
                     </div>
@@ -315,7 +310,7 @@ export default function App() {
                     </div>
 
                     {!isClosed ? (
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', background: '#f8fafc', padding: '10px', borderRadius: '8px' }}>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', background: '#f8fafc', padding: '10px', borderRadius: '8px' }}>
                         <input
                           type="text"
                           placeholder="Your Reg No (e.g. 22BCE1001)"
@@ -324,7 +319,7 @@ export default function App() {
                             ...claimData,
                             [post.id]: { ...claimData[post.id], regNo: e.target.value }
                           })}
-                          style={{ flex: 2, minWidth: '150px', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                          style={{ flex: 2, padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
                         />
                         <input
                           type="number"
@@ -336,7 +331,7 @@ export default function App() {
                             ...claimData,
                             [post.id]: { ...claimData[post.id], qty: e.target.value }
                           })}
-                          style={{ flex: 1, minWidth: '70px', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                          style={{ flex: 1, padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
                         />
                         <button
                           onClick={() => handleClaim(post.id)}
@@ -347,7 +342,6 @@ export default function App() {
                             border: 'none',
                             borderRadius: '6px',
                             fontWeight: '600',
-                            fontSize: '0.85rem',
                             cursor: 'pointer',
                           }}
                         >
@@ -355,7 +349,7 @@ export default function App() {
                         </button>
                       </div>
                     ) : (
-                      <div style={{ display: 'inline-block', padding: '4px 10px', borderRadius: '4px', background: '#fee2e2', color: '#b91c1c', fontSize: '0.8rem', fontWeight: '700' }}>
+                      <div style={{ display: 'inline-block', padding: '6px 12px', borderRadius: '6px', background: '#fee2e2', color: '#b91c1c', fontSize: '0.82rem', fontWeight: '700' }}>
                         POST CLOSED (EXPIRED OR CLAIMED OUT)
                       </div>
                     )}

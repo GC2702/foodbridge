@@ -8,10 +8,13 @@ app.use(express.json());
 let posts = [];
 let claims = [];
 
+function isExpired(post) {
+  return new Date(post.bestBefore).getTime() <= Date.now();
+}
+
 function syncStatuses() {
-  const now = Date.now();
   posts.forEach(post => {
-    if (new Date(post.bestBefore).getTime() <= now || post.remainingServings <= 0) {
+    if (isExpired(post) || post.remainingServings <= 0) {
       post.status = 'CLOSED';
     }
   });
@@ -37,7 +40,7 @@ app.post('/api/posts', (req, res) => {
     totalServings: Number(totalServings),
     remainingServings: Number(totalServings),
     pickupPoint,
-    bestBefore,
+    bestBefore: new Date(bestBefore).toISOString(),
     status: 'OPEN',
     createdAt: new Date().toISOString()
   };
@@ -57,7 +60,7 @@ app.post('/api/posts/:id/claims', (req, res) => {
     return res.status(404).json({ error: 'Post not found.' });
   }
 
-  if (post.status === 'CLOSED' || new Date(post.bestBefore).getTime() <= Date.now()) {
+  if (post.status === 'CLOSED' || isExpired(post)) {
     post.status = 'CLOSED';
     return res.status(400).json({ error: 'Post is closed or expired.' });
   }
@@ -87,7 +90,7 @@ app.get('/api/stats', (req, res) => {
   syncStatuses();
   const servingsSaved = claims.reduce((acc, c) => acc + c.quantity, 0);
   const servingsMissed = posts
-    .filter(p => p.status === 'CLOSED' || new Date(p.bestBefore).getTime() <= Date.now())
+    .filter(p => p.status === 'CLOSED' || isExpired(p))
     .reduce((acc, p) => acc + p.remainingServings, 0);
 
   res.json({ servingsSaved, servingsMissed });
