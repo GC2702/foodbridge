@@ -118,6 +118,17 @@ export default function App() {
     }
   };
 
+  const handleReset = async () => {
+    if (!window.confirm('Are you sure you want to delete all listings and reset metrics?')) return;
+    try {
+      await fetch(`${API_BASE}/api/reset`, { method: 'POST' });
+      setSuccessMsg('All entries deleted and metrics reset.');
+      fetchData();
+    } catch (err) {
+      setErrorMsg('Failed to reset data.');
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a', fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', padding: '32px 16px' }}>
       <div style={{ maxWidth: '850px', margin: '0 auto' }}>
@@ -129,9 +140,26 @@ export default function App() {
             </div>
             <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.95rem' }}>Campus surplus food redistribution network</p>
           </div>
-          <span style={{ padding: '4px 12px', background: '#dbeafe', color: '#1e40af', borderRadius: '16px', fontSize: '0.8rem', fontWeight: '600' }}>
-            Live Feed
-          </span>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button
+              onClick={handleReset}
+              style={{
+                padding: '4px 12px',
+                background: '#fee2e2',
+                color: '#991b1b',
+                border: '1px solid #fecaca',
+                borderRadius: '16px',
+                fontSize: '0.8rem',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+            >
+              Clear All Entries
+            </button>
+            <span style={{ padding: '4px 12px', background: '#dbeafe', color: '#1e40af', borderRadius: '16px', fontSize: '0.8rem', fontWeight: '600' }}>
+              Live Feed
+            </span>
+          </div>
         </header>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '28px' }}>

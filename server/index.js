@@ -93,5 +93,11 @@ app.get('/api/stats', (req, res) => {
   res.json({ servingsSaved, servingsMissed });
 });
 
+app.post('/api/reset', (req, res) => {
+  posts = [];
+  claims = [];
+  res.json({ success: true, message: 'All data cleared successfully' });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server on port ${PORT}`));
